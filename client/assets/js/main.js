@@ -1,16 +1,18 @@
-const ZONES = ["Kök", "Säng", "Allrum nere", "Allrum uppe", "Toa nere", "Toa Uppe", "Bastu"]
-const SOURCES = ["iPad", "Computer", "Kitchen TV", "Upstairs TV"]
 const SEND_THROTTLE_MS = 100
 
-doubleTapCounter = 0
+let doubleTapCounter = 0
 
 let nextInputSendAllowed = 0
 let connectionAttempts = 0
 let nextConnectionAttempt = 0
 let webSocket
 
+let zones
+let sources
+
 const container = $("#container")
 
+setCustomValues()
 showConnectingScreen()
 connectWebSocket()
 
@@ -79,7 +81,7 @@ function setupPage() {
     let newContent = `<table class="w3-table-all w3-card">`
     for (let i = 0; i < 7; i++) {
         newContent += `<tr class=""><td>`
-        newContent += `<h3 id="zone_id_header" class="center" onclick="toggleAdvancedSettings(${i})">${ZONES[i]}</h3>`
+        newContent += `<h3 id="zone_id_header" class="center" onclick="toggleAdvancedSettings(${i})">${zones[i]}</h3>`
         newContent += `<div class="w3-row-padding">`
         newContent += `<div class="w3-half same-row">`
         newContent += createPowerButton(i, "w3-margin-right")
@@ -145,7 +147,7 @@ function createSourceSelector(zoneId, html, classes) {
     const html_id = `zone_${zoneId}_source`
     let sourceSelector = `<select id="${html_id}" class="w3-select ${classes}" onchange="handleInputChanged(${zoneId}, this.selectedIndex)">`;
     let i = 0
-    SOURCES.forEach(source => {
+    sources.forEach(source => {
         sourceSelector += `<option value="${i}">${source}</option>`
         i++;
     })
@@ -154,7 +156,7 @@ function createSourceSelector(zoneId, html, classes) {
 }
 
 function handleInputChanged(id, inputId) {
-    console.log(`Input changed to ${SOURCES[inputId]} for ${ZONES[id]}`)
+    console.log(`Input changed to ${sources[inputId]} for ${zones[id]}`)
     jsn = {}
     jsn["value"] = inputId
     jsn["type"] = "input"
@@ -233,4 +235,26 @@ function sendCommand(id, jsn) {
 
 function now() {
     return (new Date).getTime();
+}
+
+function setCustomValues() {
+    $.getJSON("assets/config.json")
+        .done(d => {
+            console.log("Found data " + d)
+            setCustomValuesFromJson(d)
+        })
+        .fail(() => {
+
+            console.log("No trying default")
+            $.getJSON("assets/config-default.json")
+                .done(d => {
+                    console.log("Found default data " + d)
+                    setCustomValuesFromJson(d)
+                })
+        })
+}
+
+function setCustomValuesFromJson(jsn) {
+    zones = jsn["zones"]
+    sources = jsn["sources"]
 }
