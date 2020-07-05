@@ -16,7 +16,7 @@
     </div>
     <script> HOST = "<?php echo $_SERVER['SERVER_ADDR']; ?>"</script>
     <script src="assets/js/icons.js"></script>
-    <script src="assets/js/jquery.slim.min.js"></script>
+    <script src="assets/js/jquery.min.js"></script>
     <script src="assets/js/main.js"></script>
 </body>
 
