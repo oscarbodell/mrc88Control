@@ -34,12 +34,15 @@ class WebSocketServer:
             print("Stopped polling amp")
 
     async def registerClient(self, websocket):
+        print("registerClient")
         self.connections.add(websocket)
 
     async def removeClient(self, websocket):
+        print("removeClient")
         self.connections.remove(websocket)
 
     async def handleWebSocket(self, websocket, path):
+        print("handleWebSocket")
         await self.registerClient(websocket)
         try:
             async for message in websocket:
@@ -55,6 +58,7 @@ class WebSocketServer:
             await self.removeClient(websocket)
 
     async def handleCommand(self, websocket, jsn):
+        print("handleCommand")
         try:
             t = jsn['type']
             channel = jsn['id']
@@ -89,12 +93,14 @@ class WebSocketServer:
         return data
 
     async def updateState(self, websocket, channel):
+        print("updateState")
         if self.ampConnected:
             await self.sendNoAmp()
         else:
             await self.sendStateData(websocket, self.getCurrentState(channel))
 
     async def sendStateData(self, websocket, stateData):
+        print("sendStateData")
         jsn = {"responseType": "state"}
         data = []
         for channel in stateData:
@@ -104,6 +110,7 @@ class WebSocketServer:
 
     async def sendNoAmp(self):
         self.ampConnected = False
+        print("sendNoAmp")
         jsn = {"responseType": "noAmp"}
         print("Sending no amp")
         for websocket in self.connections:
@@ -111,6 +118,7 @@ class WebSocketServer:
 
     async def checkAmpPeriodically(self):
         while True:
+            print("checkAmpPeriodically")
             await asyncio.sleep(30)
             try:
                 changedAmpData = self.amp.checkIfAmpChanged()
