@@ -164,8 +164,11 @@ class Interface:
     def sendCommand(self, channel, attribute, value):
         command = '!{}{}{}+'.format(channel + 1, attribute, value)
         # try:
+        print("Write command")
         self.ser.write(command.encode(ENCODING))
+        print("Read command")
         resp = self.ser.read_until(b"K").strip(b"\r")
+        print("Done Read command {}".format(resp))
         if len(resp) == 0:
             print("Command returned nothing")
             raise NoConnectionException
@@ -183,9 +186,13 @@ class Interface:
         query = '?{}{}+'.format(channel + 1, attribute)
         # try:
         #          print("Send query")
+        print("write query")
         self.ser.write(query.encode(ENCODING))
-   #         print("Write done")
+   #            print("Done Read command {}".format(resp))
+        print("Read query")
         resp = self.ser.read_until(b"+").strip(b"\r")
+        print("Done Read command {}".format(resp))
+
     #        print("Read done {}".format(resp))
         if len(resp) == 0:
             print("Query nothing")
