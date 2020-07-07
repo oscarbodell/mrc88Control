@@ -45,7 +45,7 @@ class Interface:
         if port.startswith("sim"):
             self.ser = MockSerial()
         else:
-            self.ser = serial.Serial(port, timeout=0.02, write_timeout=0.02)
+            self.ser = serial.Serial(port, timeout=1, write_timeout=1)
 
     def getAmpState(self):
         channels = []
