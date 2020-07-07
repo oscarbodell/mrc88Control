@@ -74,10 +74,6 @@ class WebSocketServer:
                 await self.updateState(ws, channel)
 
     def getCurrentState(self, channel):
-        if not self.amp.connected:
-            await self.sendNoAmp()
-            return
-
         data = []
         if channel == -1:
             for channel in self.amp.channels:
@@ -87,7 +83,10 @@ class WebSocketServer:
         return data
 
     async def updateState(self, websocket, channel):
-        await self.sendStateData(websocket, self.getCurrentState(channel))
+        if not self.amp.connected:
+            await self.sendNoAmp()
+        else:
+            await self.sendStateData(websocket, self.getCurrentState(channel))
 
     async def sendStateData(self, websocket, stateData):
         jsn = {"responseType": "state"}

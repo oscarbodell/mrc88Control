@@ -14,7 +14,8 @@
     <div class="w3-content w3-padding-large">
         <div id="container" class="w3-main"></div>
     </div>
-    <script> HOST = "<?php echo $_SERVER['SERVER_ADDR']; ?>"</script>
+    <!--<script> HOST = "<?php echo $_SERVER['SERVER_ADDR']; ?>"</script>-->
+    <script> HOST = "localhost"</script>
     <script src="assets/js/icons.js"></script>
     <script src="assets/js/jquery.min.js"></script>
     <script src="assets/js/main.js"></script>
