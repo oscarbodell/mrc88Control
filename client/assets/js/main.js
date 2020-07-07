@@ -10,6 +10,8 @@ let webSocket
 let zones
 let sources
 
+let pageSetup = false
+
 const container = $("#container")
 
 showConnectingScreen("server")
@@ -23,6 +25,9 @@ function connectWebSocket() {
         jsn = JSON.parse(event.data)
         var responseType = jsn["responseType"]
         if (responseType === "state") {
+            if (pageSetup) {
+                setupPage()
+            }
             setState(jsn["data"]);
         } else if (responseType === "noAmp") {
             showConnectingScreen("amplifier")
@@ -31,12 +36,12 @@ function connectWebSocket() {
 
     webSocket.onopen = function () {
         connectionAttempts = 0
-        setupPage()
+        getState(-1)
     }
 
     webSocket.onclose = function () {
         if (connectionAttempts === 0) {
-            showConnectingScreen()
+            showConnectingScreen("server")
         }
         attemptReconnect()
     }
@@ -66,6 +71,7 @@ function attemptReconnect() {
 }
 
 function showConnectingScreen(target) {
+    pageSetup = false
     let newContent = `<div class="w3-card w3-container w3-center w3-theme-l4">`
     newContent += `<div class="same-row">`
     newContent += `<h3>Connecting to ${target}</h3>`
@@ -108,7 +114,7 @@ function setupPage() {
     }
     newContent += `</table>`
     container.html(newContent)
-    getState(-1)
+    pageSetup = true
 }
 
 function createNamedSliderTableRow(id, name) {
