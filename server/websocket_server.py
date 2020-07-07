@@ -95,7 +95,7 @@ class WebSocketServer:
 
     async def updateState(self, websocket, channel):
         print("updateState")
-        if self.ampConnected:
+        if not self.ampConnected:
             print("updateState.ampConnected")
             await self.sendNoAmp([websocket])
         else:
