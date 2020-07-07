@@ -130,7 +130,7 @@ class WebSocketServer:
                         await self.sendStateData(websocket, changedAmpData)
             except NoConnectionException:
                 print("checkAmpPeriodically no amp except")
-                await self.sendNoAmp()
+                await self.sendNoAmp(self.connections)
 
 
 serialPort = sys.argv[1]
