@@ -169,7 +169,7 @@ class Interface:
         print("Read command")
         resp = self.ser.read_until(b"K").strip(b"\r")
         print("Done Read command {}".format(resp))
-        if len(resp) == 0:
+        if len(resp) < 2:
             print("Command returned nothing")
             raise NoConnectionException
             #         print("Print returning false")
@@ -194,7 +194,7 @@ class Interface:
         print("Done Read command {}".format(resp))
 
     #        print("Read done {}".format(resp))
-        if len(resp) == 0:
+        if len(resp) < 5:
             print("Query nothing")
             raise NoConnectionException
             #           print("Returning none")
