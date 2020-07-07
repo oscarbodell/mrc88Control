@@ -7,6 +7,10 @@ ENCODING = "utf-8"
 CHANNEL_COUNT = 8
 
 
+class NoConnectionException(Exception):
+    pass
+
+
 class MockSerial:
     pendingSet = False
     response = None
@@ -158,35 +162,37 @@ class Interface:
 
     def sendCommand(self, channel, attribute, value):
         command = '!{}{}{}+'.format(channel + 1, attribute, value)
-        try:
-            self.ser.write(command.encode(ENCODING))
-            resp = self.ser.read_until(b"K").strip(b"\r")
-            if len(resp) == 0:
-       #         print("Print returning false")
-                self.connected = False
-                return False
-            self.connected = True
-            return resp.decode(ENCODING) == "OK"
-        except serial.SerialTimeoutException:
-            self.connected = False
+        # try:
+        self.ser.write(command.encode(ENCODING))
+        resp = self.ser.read_until(b"K").strip(b"\r")
+        if len(resp) == 0:
+            raise NoConnectionException
+            #         print("Print returning false")
+            #self.connected = False
+            # return False
+         #   self.connected = True
+        return resp.decode(ENCODING) == "OK"
+        # except serial.SerialTimeoutException:
+        #   self.connected = False
         #    print("Send command timed out")
-            return False
+        #    return False
 
     def sendQuery(self, channel, attribute):
         query = '?{}{}+'.format(channel + 1, attribute)
-        try:
-  #          print("Send query")
-            self.ser.write(query.encode(ENCODING))
+        # try:
+        #          print("Send query")
+        self.ser.write(query.encode(ENCODING))
    #         print("Write done")
-            resp = self.ser.read_until(b"+").strip(b"\r")
+        resp = self.ser.read_until(b"+").strip(b"\r")
     #        print("Read done {}".format(resp))
-            if len(resp) == 0:
-     #           print("Returning none")
-                self.connected = False
-                return None
-            self.connected = True
-            return resp.decode(ENCODING)
-        except serial.SerialTimeoutException:
-            self.connected = False
+        if len(resp) == 0:
+            raise NoConnectionException
+            #           print("Returning none")
+        #    self.connected = False
+         #   return None
+        self.connected = True
+        return resp.decode(ENCODING)
+        # except serial.SerialTimeoutException:
+        #   self.connected = False
       #      print("Query command timed out")
-            return None
+        #  return None

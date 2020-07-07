@@ -5,7 +5,7 @@ import websockets
 import json
 import time
 import sys
-from mrc88_interface import Interface
+from mrc88_interface import Interface, NoConnectionException
 from channel import Channel
 
 
@@ -49,29 +49,28 @@ class WebSocketServer:
             await self.removeClient(websocket)
 
     async def handleCommand(self, websocket, jsn):
-        if not self.amp.connected:
+        try:
+            t = jsn['type']
+            channel = jsn['id']
+            value = jsn['value']
+            if t == 'volume':
+                self.amp.setVolume(channel, value)
+            elif t == 'input':
+                self.amp.selectSource(channel, value)
+            elif t == 'power':
+                self.amp.togglePower(channel)
+            elif t == 'treble':
+                self.amp.setTreble(channel, value)
+            elif t == 'bass':
+                self.amp.setBass(channel, value)
+            elif t == 'balance':
+                self.amp.setBalance(channel, value)
+
+            for ws in self.connections:
+                if ws is not websocket:
+                    await self.updateState(ws, channel)
+        except NoConnectionException:
             await self.sendNoAmp()
-            return
-
-        t = jsn['type']
-        channel = jsn['id']
-        value = jsn['value']
-        if t == 'volume':
-            self.amp.setVolume(channel, value)
-        elif t == 'input':
-            self.amp.selectSource(channel, value)
-        elif t == 'power':
-            self.amp.togglePower(channel)
-        elif t == 'treble':
-            self.amp.setTreble(channel, value)
-        elif t == 'bass':
-            self.amp.setBass(channel, value)
-        elif t == 'balance':
-            self.amp.setBalance(channel, value)
-
-        for ws in self.connections:
-            if ws is not websocket:
-                await self.updateState(ws, channel)
 
     def getCurrentState(self, channel):
         data = []
@@ -83,10 +82,7 @@ class WebSocketServer:
         return data
 
     async def updateState(self, websocket, channel):
-        if not self.amp.connected:
-            await self.sendNoAmp()
-        else:
-            await self.sendStateData(websocket, self.getCurrentState(channel))
+        await self.sendStateData(websocket, self.getCurrentState(channel))
 
     async def sendStateData(self, websocket, stateData):
         jsn = {"responseType": "state"}
@@ -105,13 +101,13 @@ class WebSocketServer:
     async def checkAmpPeriodically(self):
         while True:
             await asyncio.sleep(30)
-            changedAmpData = self.amp.checkIfAmpChanged()
-            if not self.amp.connected:
+            try:
+                changedAmpData = self.amp.checkIfAmpChanged()
+                if len(changedAmpData):
+                    for websocket in self.connections:
+                        await self.sendStateData(websocket, changedAmpData)
+            except NoConnectionException:
                 await self.sendNoAmp()
-                return
-            if len(changedAmpData):
-                for websocket in self.connections:
-                    await self.sendStateData(websocket, changedAmpData)
 
 
 serialPort = sys.argv[1]
