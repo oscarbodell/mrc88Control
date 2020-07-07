@@ -10,7 +10,7 @@ let webSocket
 let zones
 let sources
 
-let pageSetup = false
+let showingLoading = false
 
 const container = $("#container")
 
@@ -25,7 +25,7 @@ function connectWebSocket() {
         jsn = JSON.parse(event.data)
         var responseType = jsn["responseType"]
         if (responseType === "state") {
-            if (pageSetup) {
+            if (showingLoading) {
                 setupPage()
             }
             setState(jsn["data"]);
@@ -71,7 +71,7 @@ function attemptReconnect() {
 }
 
 function showConnectingScreen(target) {
-    pageSetup = false
+    showingLoading = true
     let newContent = `<div class="w3-card w3-container w3-center w3-theme-l4">`
     newContent += `<div class="same-row">`
     newContent += `<h3>Connecting to ${target}</h3>`
@@ -114,7 +114,7 @@ function setupPage() {
     }
     newContent += `</table>`
     container.html(newContent)
-    pageSetup = true
+    showingLoading = false
 }
 
 function createNamedSliderTableRow(id, name) {
