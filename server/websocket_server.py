@@ -14,6 +14,7 @@ class WebSocketServer:
     def __init__(self, amp):
         self.nextStateUpdate = time.time()
         self.connections = set()
+        self.amp = amp
         try:
             self.amp.checkIfAmpChanged()
             self.ampConnected = True
