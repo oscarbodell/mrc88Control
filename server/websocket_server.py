@@ -8,6 +8,7 @@ import sys
 from mrc88_interface import Interface
 from channel import Channel
 
+
 class WebSocketServer:
 
     def __init__(self, amp):
@@ -19,7 +20,12 @@ class WebSocketServer:
         start_server = websockets.serve(self.handleWebSocket, "0.0.0.0", 8765)
         print("Awaiting websocket connections")
         asyncio.get_event_loop().run_until_complete(start_server)
+        self.pollTask = asyncio.get_event_loop().create_task(self.checkAmpPeriodically())
         asyncio.get_event_loop().run_forever()
+        try:
+            self.pollTask.cancel()
+        except asyncio.CancelledError:
+            print("Stopped polling amp")
 
     async def registerClient(self, websocket):
         self.connections.add(websocket)
@@ -58,24 +64,39 @@ class WebSocketServer:
             self.amp.setBass(channel, value)
         elif t == 'balance':
             self.amp.setBalance(channel, value)
-        
+
         for ws in self.connections:
             if ws is not websocket:
                 await self.updateState(ws, channel)
 
     def getCurrentState(self, channel):
-        jsn = {"responseType": "state"}
         data = []
         if channel == -1:
             for channel in self.amp.channels:
-                data.append(channel.toDict())
+                data.append(channel)
         else:
-            data.append(self.amp.channels[channel].toDict())
-        jsn["data"] = data
-        return json.dumps(jsn)
+            data.append(self.amp.channels[channel])
+        return data
 
     async def updateState(self, websocket, channel):
-        await websocket.send(self.getCurrentState(channel))
+        await self.sendStateData(websocket, self.getCurrentState(channel))
+
+    async def sendStateData(self, websocket, stateData):
+        jsn = {"responseType": "state"}
+        data = []
+        for channel in stateData:
+            data.append(channel.toDict())
+        jsn["data"] = data
+        await websocket.send(json.dumps(jsn))
+
+    async def checkAmpPeriodically(self):
+        while True:
+            await asyncio.sleep(60)
+            changedAmpData = self.amp.checkIfAmpChanged()
+            if len(changedAmpData):
+                for websocket in self.connections:
+                    await self.sendStateData(websocket, changedAmpData)
+
 
 serialPort = sys.argv[1]
 amp = Interface()
@@ -84,5 +105,5 @@ try:
     server = WebSocketServer(amp)
     server.start()
 finally:
-    print ("Disconnecting from serial")
+    print("Disconnecting from serial")
     amp.disconnect()

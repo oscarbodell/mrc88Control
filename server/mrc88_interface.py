@@ -6,6 +6,7 @@ from channel import Channel
 ENCODING = "utf-8"
 CHANNEL_COUNT = 8
 
+
 class MockSerial:
     pendingSet = False
     response = None
@@ -25,11 +26,12 @@ class MockSerial:
             self.response = None
             return resp
         else:
-            print ("Error 1")
+            print("Error 1")
             return b"ERROR"
 
     def close(self):
         pass
+
 
 class Interface:
     ser = None
@@ -40,9 +42,14 @@ class Interface:
             self.ser = MockSerial()
         else:
             self.ser = serial.Serial(port, timeout=5)
+        self.channels = self.getAmpState()
+
+    def getAmpState(self):
         print("Quering amp for state: ")
+        channels = []
         for i in range(CHANNEL_COUNT):
-            print("\rQuering channel {} of {}".format(i + 1, CHANNEL_COUNT), end='')
+            print("\rQuering channel {} of {}".format(
+                i + 1, CHANNEL_COUNT), end='')
             c = Channel()
             c.id = i
             c.powerOn = self.queryPowerState(i)
@@ -52,9 +59,19 @@ class Interface:
             c.treble = self.queryTreble(i)
             c.bass = self.queryBass(i)
             c.balance = self.queryBalance(i)
-            self.channels.append(c)
+            channels.append(c)
         print("\nDone quering state!")
-    
+        return channels
+
+    def checkIfAmpChanged(self):
+        changedChannels = []
+        channels = self.getAmpState()
+        for i in range(CHANNEL_COUNT):
+            if channels[i] != self.channels[i]:
+                changedChannels.append(channels[i])
+        self.channels = channels
+        return changedChannels
+
     def disconnect(self):
         self.ser.close()
 
@@ -67,7 +84,7 @@ class Interface:
     def sendPowerCommand(self, channel, setToOn):
         if self.sendCommand(channel, "PR", 1 if setToOn else 0):
             self.channels[channel].powerOn = setToOn
-            
+
     def sendMuteCommand(self, channel, setToOn):
         if self.sendCommand(channel, "MU", 1 if setToOn else 0):
             self.channels[channel].mute = setToOn
@@ -102,7 +119,7 @@ class Interface:
     def queryVolume(self, channel):
         resp = self.getNumberFromResponse(self.sendQuery(channel, "VO"))
         return int(resp / 0.38)
-    
+
     def querySource(self, channel):
         resp = self.getNumberFromResponse(self.sendQuery(channel, "SS"))
         return resp - 1
@@ -117,7 +134,7 @@ class Interface:
     def queryBass(self, channel):
         resp = self.getNumberFromResponse(self.sendQuery(channel, "BS"))
         return int(resp / 0.14)
-    
+
     def queryBalance(self, channel):
         resp = self.getNumberFromResponse(self.sendQuery(channel, "BA"))
         return int(resp / 0.63)
@@ -135,7 +152,7 @@ class Interface:
         command = '!{}{}{}+'.format(channel + 1, attribute, value)
         self.ser.write(command.encode(ENCODING))
         resp = self.ser.read_until(b"K").strip(b"\r")
-        return resp.decode(ENCODING) ==  "OK"
+        return resp.decode(ENCODING) == "OK"
 
     def sendQuery(self, channel, attribute):
         query = '?{}{}+'.format(channel + 1, attribute)

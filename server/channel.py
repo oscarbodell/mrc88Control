@@ -14,6 +14,16 @@ class Channel:
         return "Id: {}\nPwr: {}\nMute:{}\nSource: {}\nVol: {}\n Treble: {}, Bass: {}, Bal: {}"\
             .format(self.id, self.powerOn, self.mute, self.source, self.volume, self.treble, self.bass, self.balance)
 
+    def __eq__(self, other):
+        return self.id == other.id \
+            and self.volume == other.volume \
+            and self.source == other.source \
+            and self.powerOn == other.powerOn \
+            and self.mute == other.mute \
+            and self.treble == other.treble \
+            and self.bass == other.bass \
+            and self.balance == other.balance
+
     def toDict(self):
         vals = {}
         vals["id"] = self.id
