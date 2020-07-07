@@ -125,6 +125,7 @@ class WebSocketServer:
             await asyncio.sleep(5)
             try:
                 changedAmpData = self.amp.checkIfAmpChanged()
+                self.ampConnected = True
                 if len(changedAmpData):
                     for websocket in self.connections:
                         await self.sendStateData(websocket, changedAmpData)

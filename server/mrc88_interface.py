@@ -162,6 +162,7 @@ class Interface:
         self.ser.write(command.encode(ENCODING))
         resp = self.ser.read_until(b"K").strip(b"\r")
         if len(resp) == 0:
+            print("Command returned nothing")
             raise NoConnectionException
             #         print("Print returning false")
             #self.connected = False
@@ -182,6 +183,7 @@ class Interface:
         resp = self.ser.read_until(b"+").strip(b"\r")
     #        print("Read done {}".format(resp))
         if len(resp) == 0:
+            print("Query nothing")
             raise NoConnectionException
             #           print("Returning none")
         #    self.connected = False
