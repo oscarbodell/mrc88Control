@@ -12,7 +12,7 @@ let sources
 
 const container = $("#container")
 
-showConnectingScreen()
+showConnectingScreen("server")
 setCustomValues()
 connectWebSocket()
 
@@ -21,8 +21,11 @@ function connectWebSocket() {
     webSocket.onmessage = function (event) {
         console.log(event.data);
         jsn = JSON.parse(event.data)
-        if (jsn["responseType"] === "state") {
+        var responseType = jsn["responseType"]
+        if (responseType === "state") {
             setState(jsn["data"]);
+        } else if (responseType === "noAmp") {
+            showConnectingScreen("amplifier")
         }
     }
 
@@ -62,13 +65,13 @@ function attemptReconnect() {
     }, 1000)
 }
 
-function showConnectingScreen() {
+function showConnectingScreen(target) {
     let newContent = `<div class="w3-card w3-container w3-center w3-theme-l4">`
     newContent += `<div class="same-row">`
     newContent += `<h3>Connecting to amp</h3>`
     newContent += `<img id="reconnect-spinner" class="w3-spin" src="assets/img/spinner-of-dots.png"/>`
     newContent += `</div>`
-    newContent += `<p id="reset_timer">Attempting to connect</p>`
+    newContent += `<p id="reset_timer">Attempting to connect to ${target}</p>`
     newContent += `<button id="reconnect-button" class="w3-margin-bottom w3-button w3-light-grey w3-disabled" onclick="forceReconnect()">Force reconnect</button>`
     container.html(newContent)
 }

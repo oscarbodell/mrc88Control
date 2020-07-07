@@ -49,6 +49,10 @@ class WebSocketServer:
             await self.removeClient(websocket)
 
     async def handleCommand(self, websocket, jsn):
+        if not self.amp.connected:
+            await self.sendNoAmp()
+            return
+
         t = jsn['type']
         channel = jsn['id']
         value = jsn['value']
@@ -70,6 +74,10 @@ class WebSocketServer:
                 await self.updateState(ws, channel)
 
     def getCurrentState(self, channel):
+        if not self.amp.connected:
+            await self.sendNoAmp()
+            return
+
         data = []
         if channel == -1:
             for channel in self.amp.channels:
@@ -89,10 +97,18 @@ class WebSocketServer:
         jsn["data"] = data
         await websocket.send(json.dumps(jsn))
 
+    async def sendNoAmp(self):
+        jsn = {"responseType": "noAmp"}
+        for websocket in self.connections:
+            await websocket.send(json.dumps(jsn))
+
     async def checkAmpPeriodically(self):
         while True:
-            await asyncio.sleep(60)
+            await asyncio.sleep(2)
             changedAmpData = self.amp.checkIfAmpChanged()
+            if not self.amp.connected:
+                await self.sendNoAmp()
+                return
             if len(changedAmpData):
                 for websocket in self.connections:
                     await self.sendStateData(websocket, changedAmpData)

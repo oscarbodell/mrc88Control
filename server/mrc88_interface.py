@@ -36,20 +36,20 @@ class MockSerial:
 class Interface:
     ser = None
     channels = []
+    connected = False
 
     def connect(self, port):
         if port.startswith("sim"):
             self.ser = MockSerial()
         else:
-            self.ser = serial.Serial(port, timeout=5)
+            self.ser = serial.Serial(port, timeout=1, write_timeout=0.1)
+            self.connected = True
+
         self.channels = self.getAmpState()
 
     def getAmpState(self):
-        print("Quering amp for state: ")
         channels = []
         for i in range(CHANNEL_COUNT):
-            print("\rQuering channel {} of {}".format(
-                i + 1, CHANNEL_COUNT), end='')
             c = Channel()
             c.id = i
             c.powerOn = self.queryPowerState(i)
@@ -60,7 +60,6 @@ class Interface:
             c.bass = self.queryBass(i)
             c.balance = self.queryBalance(i)
             channels.append(c)
-        print("\nDone quering state!")
         return channels
 
     def checkIfAmpChanged(self):
@@ -140,9 +139,9 @@ class Interface:
         return int(resp / 0.63)
 
     def getNumberFromResponse(self, response):
-        number = response[4:6]
+        number = response[4: 6]
         if (number.endswith("+")):
-            number = number[:-1]
+            number = number[: -1]
         return int(number)
 
     def getBoolFromResponse(self, response):
@@ -150,12 +149,22 @@ class Interface:
 
     def sendCommand(self, channel, attribute, value):
         command = '!{}{}{}+'.format(channel + 1, attribute, value)
-        self.ser.write(command.encode(ENCODING))
-        resp = self.ser.read_until(b"K").strip(b"\r")
-        return resp.decode(ENCODING) == "OK"
+        try:
+            self.ser.write(command.encode(ENCODING))
+            resp = self.ser.read_until(b"K").strip(b"\r")
+            return resp.decode(ENCODING) == "OK"
+        except serial.SerialTimeoutException:
+            self.connected = False
+            print("Send command timed out")
+            return False
 
     def sendQuery(self, channel, attribute):
         query = '?{}{}+'.format(channel + 1, attribute)
-        self.ser.write(query.encode(ENCODING))
-        resp = self.ser.read_until(b"+").strip(b"\r")
-        return resp.decode(ENCODING)
+        try:
+            self.ser.write(query.encode(ENCODING))
+            resp = self.ser.read_until(b"+").strip(b"\r")
+            return resp.decode(ENCODING)
+        except serial.SerialTimeoutException:
+            self.connected = False
+            print("Query command timed out")
+            return False
