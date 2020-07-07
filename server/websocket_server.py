@@ -14,7 +14,11 @@ class WebSocketServer:
     def __init__(self, amp):
         self.nextStateUpdate = time.time()
         self.connections = set()
-        self.amp = amp
+        try:
+            self.amp.checkIfAmpChanged()
+            self.ampConnected = True
+        except NoConnectionException:
+            self.ampConnected = False
 
     def start(self):
         start_server = websockets.serve(self.handleWebSocket, "0.0.0.0", 8765)
@@ -82,7 +86,10 @@ class WebSocketServer:
         return data
 
     async def updateState(self, websocket, channel):
-        await self.sendStateData(websocket, self.getCurrentState(channel))
+        if self.ampConnected:
+            await self.sendNoAmp()
+        else:
+            await self.sendStateData(websocket, self.getCurrentState(channel))
 
     async def sendStateData(self, websocket, stateData):
         jsn = {"responseType": "state"}
@@ -93,6 +100,7 @@ class WebSocketServer:
         await websocket.send(json.dumps(jsn))
 
     async def sendNoAmp(self):
+        self.ampConnected = False
         jsn = {"responseType": "noAmp"}
         print("Sending no amp")
         for websocket in self.connections:

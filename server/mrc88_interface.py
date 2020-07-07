@@ -40,16 +40,12 @@ class MockSerial:
 class Interface:
     ser = None
     channels = []
-    connected = False
 
     def connect(self, port):
         if port.startswith("sim"):
             self.ser = MockSerial()
         else:
             self.ser = serial.Serial(port, timeout=0.02, write_timeout=0.02)
-            self.connected = True
-
-        self.channels = self.getAmpState()
 
     def getAmpState(self):
         channels = []
@@ -190,7 +186,6 @@ class Interface:
             #           print("Returning none")
         #    self.connected = False
          #   return None
-        self.connected = True
         return resp.decode(ENCODING)
         # except serial.SerialTimeoutException:
         #   self.connected = False
