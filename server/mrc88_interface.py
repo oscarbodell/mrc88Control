@@ -70,7 +70,7 @@ class Interface:
         changedChannels = []
         channels = self.getAmpState()
         for i in range(CHANNEL_COUNT):
-            if channels[i] != self.channels[i]:
+            if i >= len(self.channels) or channels[i] != self.channels[i]:
                 changedChannels.append(channels[i])
         self.channels = channels
         return changedChannels
