@@ -98,12 +98,13 @@ class WebSocketServer:
 
     async def sendNoAmp(self):
         jsn = {"responseType": "noAmp"}
+        print("Sending no amp")
         for websocket in self.connections:
             await websocket.send(json.dumps(jsn))
 
     async def checkAmpPeriodically(self):
         while True:
-            await asyncio.sleep(2)
+            await asyncio.sleep(30)
             changedAmpData = self.amp.checkIfAmpChanged()
             if not self.amp.connected:
                 await self.sendNoAmp()
