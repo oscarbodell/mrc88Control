@@ -18,6 +18,7 @@ class WebSocketServer:
         try:
             self.amp.checkIfAmpChanged()
             self.ampConnected = True
+            print("init finished correctly")
         except NoConnectionException:
             print("init no amp except")
             self.ampConnected = False
@@ -80,8 +81,8 @@ class WebSocketServer:
                 if ws is not websocket:
                     await self.updateState(ws, channel)
         except NoConnectionException:
-            print("checkAmpPehandleCommandriodically no amp except")
-            await self.sendNoAmp()
+            print("handleCommandriodically no amp except")
+            await self.sendNoAmp([websocket])
 
     def getCurrentState(self, channel):
         data = []
@@ -95,8 +96,10 @@ class WebSocketServer:
     async def updateState(self, websocket, channel):
         print("updateState")
         if self.ampConnected:
-            await self.sendNoAmp()
+            print("updateState.ampConnected")
+            await self.sendNoAmp([websocket])
         else:
+            print("updateState.sendStateData")
             await self.sendStateData(websocket, self.getCurrentState(channel))
 
     async def sendStateData(self, websocket, stateData):
@@ -108,12 +111,12 @@ class WebSocketServer:
         jsn["data"] = data
         await websocket.send(json.dumps(jsn))
 
-    async def sendNoAmp(self):
+    async def sendNoAmp(self, websockets):
         self.ampConnected = False
         print("sendNoAmp")
         jsn = {"responseType": "noAmp"}
         print("Sending no amp")
-        for websocket in self.connections:
+        for websocket in websockets:
             await websocket.send(json.dumps(jsn))
 
     async def checkAmpPeriodically(self):

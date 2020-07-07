@@ -68,7 +68,7 @@ function attemptReconnect() {
 function showConnectingScreen(target) {
     let newContent = `<div class="w3-card w3-container w3-center w3-theme-l4">`
     newContent += `<div class="same-row">`
-    newContent += `<h3>Connecting to amp</h3>`
+    newContent += `<h3>Connecting to ${target}</h3>`
     newContent += `<img id="reconnect-spinner" class="w3-spin" src="assets/img/spinner-of-dots.png"/>`
     newContent += `</div>`
     newContent += `<p id="reset_timer">Attempting to connect to ${target}</p>`
