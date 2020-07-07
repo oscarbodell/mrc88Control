@@ -12,8 +12,8 @@ let sources
 
 const container = $("#container")
 
-setCustomValues()
 showConnectingScreen()
+setCustomValues()
 connectWebSocket()
 
 function connectWebSocket() {
@@ -134,8 +134,6 @@ function toggleAdvancedSettings(id) {
 
 function createPowerButton(id, classes) {
     return powerIcon(`zone_${id}_power`, `svg-icon-small svg-light-grey ${classes}`, `handlePowerButton(${id})`)
-    console.log(d)
-    return d
 }
 
 function createSlider(id, type, classes) {
@@ -238,21 +236,24 @@ function now() {
 }
 
 function setCustomValues() {
-    $.getJSON("assets/config.json")
-        .done(d => {
-            console.log("Found data " + d)
-            setCustomValuesFromJson(d)
+    syncRequest("assets/config.json", result => {
+        setCustomValuesFromJson(result)
+    }, () => {
+        syncRequest("assets/config.json", result => {
+            setCustomValuesFromJson(result)
         })
-        .fail(() => {
-
-            console.log("No trying default")
-            $.getJSON("assets/config-default.json")
-                .done(d => {
-                    console.log("Found default data " + d)
-                    setCustomValuesFromJson(d)
-                })
-        })
+    })
 }
+
+function syncRequest(path, onSuccess, onFail) {
+    $.ajax({
+        url: path,
+        success: onSuccess,
+        error: onFail,
+        async: false
+    })
+}
+
 
 function setCustomValuesFromJson(jsn) {
     zones = jsn["zones"]
