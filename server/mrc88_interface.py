@@ -155,6 +155,12 @@ class Interface:
         return response[4] == "1"
 
     def sendCommand(self, channel, attribute, value):
+        if self.ser.in_waiting() > 0:
+            print("stuff waiting in command input buffer, flushing")
+            self.ser.reset_input_buffer()
+        if self.ser.out_waiting() > 0:
+            print("stuff waiting in command output buffer, flushing")
+            self.ser.reset_output_buffer()
         command = '!{}{}{}+'.format(channel + 1, attribute, value)
         self.ser.write(command.encode(ENCODING))
         resp = self.ser.read_until(b"K").strip(b"\r")
@@ -167,12 +173,18 @@ class Interface:
         return resp.decode(ENCODING) == "OK"
 
     def sendQuery(self, channel, attribute):
+        if self.ser.in_waiting() > 0:
+            print("stuff waiting in query input buffer, flushing")
+            self.ser.reset_input_buffer()
+        if self.ser.out_waiting() > 0:
+            print("stuff waiting in query output buffer, flushing")
+            self.ser.reset_output_buffer()
+
         query = '?{}{}+'.format(channel + 1, attribute)
         self.ser.write(query.encode(ENCODING))
         resp = self.ser.read_until(b"+").strip(b"\r")
         print("Query response {}".format(resp))
-        self.ser.reset_output_buffer()
-        self.ser.reset_input_buffer()
+        # self.ser.reset_output_buffer()
         if len(resp) < 5:
             print("Query raises exception")
             raise NoConnectionException
