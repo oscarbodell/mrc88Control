@@ -155,24 +155,24 @@ class Interface:
         return response[4] == "1"
 
     def sendCommand(self, channel, attribute, value):
-        # self.ser.reset_input_buffer()
-        # self.ser.reset_output_buffer()
         command = '!{}{}{}+'.format(channel + 1, attribute, value)
         self.ser.write(command.encode(ENCODING))
         resp = self.ser.read_until(b"K").strip(b"\r")
         print("Command response {}".format(resp))
+        self.ser.reset_output_buffer()
+        self.ser.reset_input_buffer()
         # if len(resp) < 2:
         #    print("Send command raised exception")
         #    raise NoConnectionException
         return resp.decode(ENCODING) == "OK"
 
     def sendQuery(self, channel, attribute):
-        # self.ser.reset_input_buffer()
-        # self.ser.reset_output_buffer()
         query = '?{}{}+'.format(channel + 1, attribute)
         self.ser.write(query.encode(ENCODING))
         resp = self.ser.read_until(b"+").strip(b"\r")
         print("Query response {}".format(resp))
+        self.ser.reset_output_buffer()
+        self.ser.reset_input_buffer()
         if len(resp) < 5:
             print("Query raises exception")
             raise NoConnectionException
