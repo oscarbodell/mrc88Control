@@ -155,7 +155,7 @@ class Interface:
         return response[4] == "1"
 
     def sendCommand(self, channel, attribute, value):
-        self.ser.reset_input_buffer()
+        # self.ser.reset_input_buffer()
         # self.ser.reset_output_buffer()
         command = '!{}{}{}+'.format(channel + 1, attribute, value)
         self.ser.write(command.encode(ENCODING))
@@ -167,7 +167,7 @@ class Interface:
         return resp.decode(ENCODING) == "OK"
 
     def sendQuery(self, channel, attribute):
-        self.ser.reset_input_buffer()
+        # self.ser.reset_input_buffer()
         # self.ser.reset_output_buffer()
         query = '?{}{}+'.format(channel + 1, attribute)
         self.ser.write(query.encode(ENCODING))
