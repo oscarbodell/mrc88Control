@@ -161,9 +161,9 @@ class Interface:
         self.ser.write(command.encode(ENCODING))
         resp = self.ser.read_until(b"K").strip(b"\r")
         print("Command response {}".format(resp))
-        if len(resp) < 2:
-            print("Send command raised exception")
-            raise NoConnectionException
+        # if len(resp) < 2:
+        #    print("Send command raised exception")
+        #    raise NoConnectionException
         return resp.decode(ENCODING) == "OK"
 
     def sendQuery(self, channel, attribute):
