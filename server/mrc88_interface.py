@@ -71,7 +71,7 @@ class Interface:
             if i >= len(self.channels) or channels[i] != self.channels[i]:
                 changedChannels.append(channels[i])
         self.channels = channels
-        return changedChannels
+        return self.channels
 
     def disconnect(self):
         self.ser.close()
