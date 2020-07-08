@@ -13,6 +13,7 @@ class WebSocketServer:
 
     def __init__(self, amp):
         self.nextStateUpdate = time.time()
+        self.nextAmpPoll = -1
         self.connections = set()
         self.amp = amp
         try:
@@ -60,6 +61,7 @@ class WebSocketServer:
 
     async def handleCommand(self, websocket, jsn):
         print("handleCommand")
+        self.scheduleNextAmpPoll()
         try:
             t = jsn['type']
             channel = jsn['id']
@@ -119,10 +121,15 @@ class WebSocketServer:
         for websocket in websockets:
             await websocket.send(json.dumps(jsn))
 
+    def scheduleNextAmpPoll(self):
+        self.nextAmpPoll = time.time() + 5
+
     async def checkAmpPeriodically(self):
         while True:
+            await asyncio.sleep(1)
+            if time.time() < self.nextAmpPoll:
+                continue
             print("checkAmpPeriodically")
-            await asyncio.sleep(5)
             try:
                 changedAmpData = self.amp.checkIfAmpChanged()
                 self.ampConnected = True

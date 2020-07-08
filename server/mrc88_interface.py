@@ -45,7 +45,7 @@ class Interface:
         if port.startswith("sim"):
             self.ser = MockSerial()
         else:
-            self.ser = serial.Serial(port, timeout=1, write_timeout=1)
+            self.ser = serial.Serial(port, timeout=0.1, write_timeout=0.1)
 
     def getAmpState(self):
         channels = []
@@ -163,45 +163,18 @@ class Interface:
 
     def sendCommand(self, channel, attribute, value):
         command = '!{}{}{}+'.format(channel + 1, attribute, value)
-        # try:
-        print("Write command")
         self.ser.write(command.encode(ENCODING))
-        print("Read command")
         resp = self.ser.read_until(b"K").strip(b"\r")
-        print("Done Read command {}".format(resp))
         if len(resp) < 2:
-            print("Command returned nothing")
+            print("Send command raised exception")
             raise NoConnectionException
-            #         print("Print returning false")
-            #self.connected = False
-            # return False
-         #   self.connected = True
         return resp.decode(ENCODING) == "OK"
-        # except serial.SerialTimeoutException:
-        #   self.connected = False
-        #    print("Send command timed out")
-        #    return False
 
     def sendQuery(self, channel, attribute):
         query = '?{}{}+'.format(channel + 1, attribute)
-        # try:
-        #          print("Send query")
-        print("write query")
         self.ser.write(query.encode(ENCODING))
-   #            print("Done Read command {}".format(resp))
-        print("Read query")
         resp = self.ser.read_until(b"+").strip(b"\r")
-        print("Done Read command {}".format(resp))
-
-    #        print("Read done {}".format(resp))
         if len(resp) < 5:
-            print("Query nothing")
+            print("Query raises exception")
             raise NoConnectionException
-            #           print("Returning none")
-        #    self.connected = False
-         #   return None
         return resp.decode(ENCODING)
-        # except serial.SerialTimeoutException:
-        #   self.connected = False
-      #      print("Query command timed out")
-        #  return None
