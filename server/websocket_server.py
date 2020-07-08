@@ -122,7 +122,7 @@ class WebSocketServer:
             await websocket.send(json.dumps(jsn))
 
     def scheduleNextAmpPoll(self):
-        self.nextAmpPoll = time.time() + 5
+        self.nextAmpPoll = time.time() + 10
 
     async def checkAmpPeriodically(self):
         while True:
@@ -136,6 +136,7 @@ class WebSocketServer:
                 if len(changedAmpData):
                     for websocket in self.connections:
                         await self.sendStateData(websocket, changedAmpData)
+                self.scheduleNextAmpPoll()
             except NoConnectionException:
                 print("checkAmpPeriodically no amp except")
                 await self.sendNoAmp(self.connections)
