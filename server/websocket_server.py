@@ -90,7 +90,7 @@ class WebSocketServer:
 
     async def checkAmpPeriodically(self):
         while True:
-            await asyncio.sleep(60)
+            await asyncio.sleep(600)
             changedAmpData = self.amp.checkIfAmpChanged()
             if len(changedAmpData):
                 for websocket in self.connections:
