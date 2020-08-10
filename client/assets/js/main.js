@@ -166,7 +166,6 @@ function handlePowerButton(id) {
     jsn["type"] = "power"
     jsn["value"] = "toggle"
     sendCommand(id, jsn)
-    setPowerButtonState(id, $(`#zone_${id}_power`).hasClass("power-button-off"))
 }
 
 function getState(zoneId) {

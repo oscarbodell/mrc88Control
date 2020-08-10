@@ -66,8 +66,7 @@ class WebSocketServer:
             self.amp.setBalance(channel, value)
 
         for ws in self.connections:
-            if ws is not websocket:
-                await self.updateState(ws, channel)
+            await self.updateState(ws, channel)
 
     def getCurrentState(self, channel):
         data = []
