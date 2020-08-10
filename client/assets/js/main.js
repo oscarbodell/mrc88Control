@@ -79,7 +79,7 @@ function forceReconnect() {
 
 function setupPage() {
     let newContent = `<table class="w3-table-all w3-card">`
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < 8; i++) {
         newContent += `<tr class=""><td>`
         newContent += `<h3 id="zone_id_header" class="center" onclick="toggleAdvancedSettings(${i})">${zones[i]}</h3>`
         newContent += `<div class="w3-row-padding">`
