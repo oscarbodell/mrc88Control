@@ -87,7 +87,7 @@ function setupPage() {
         newContent += createPowerButton(i, "w3-margin-right")
         newContent += createSourceSelector(i, container, "")
         newContent += `</div>`
-        newContent += createSlider(i, "volume", "w3-half w3-margin-top")
+        newContent += createSlider(i, "volume", "w3-half w3-margin-top", 40)
         newContent += `</div>`
 
         //Ugly hack to keep rows alternating correctly
@@ -109,7 +109,7 @@ function setupPage() {
 }
 
 function createNamedSliderTableRow(id, name) {
-    return `<tr class="w3-dark-grey" onclick="resetSlider(${id}, '${name}')"><td>${name}</td><td>${createSlider(id, name, "")}</td></tr>`
+    return `<tr class="w3-dark-grey" onclick="resetSlider(${id}, '${name}')"><td>${name}</td><td>${createSlider(id, name, "", 100)}</td></tr>`
 }
 
 function resetSlider(id, name) {
@@ -136,9 +136,9 @@ function createPowerButton(id, classes) {
     return powerIcon(`zone_${id}_power`, `svg-icon-small svg-light-grey ${classes}`, `handlePowerButton(${id})`)
 }
 
-function createSlider(id, type, classes) {
+function createSlider(id, type, classes, max) {
     const html_id = `zone_${id}_${type}`
-    return `<input type="range" min="0" id="${html_id}" class="slider ${classes}" max="100" oninput="handleSlider(${id}, '${type}')">`
+    return `<input type="range" min="0" id="${html_id}" class="slider ${classes}" max="${max}" oninput="handleSlider(${id}, '${type}')">`
 }
 
 function createSourceSelector(zoneId, html, classes) {
